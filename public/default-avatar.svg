@@ -1,0 +1,12 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="ring-inner">
+      <circle cx="120" cy="120" r="110" />
+    </clipPath>
+  </defs>
+  <circle cx="120" cy="120" r="115" fill="none" stroke="#d8dee5" stroke-width="10" />
+  <g clip-path="url(#ring-inner)">
+    <circle cx="120" cy="96" r="38" fill="#d8dee5" />
+    <path d="M40 220c0-50 36-84 80-84s80 34 80 84" fill="#d8dee5" />
+  </g>
+</svg>

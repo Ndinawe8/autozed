@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id              String   @id @default(cuid())
+  make            String
+  model           String
+  variant         String?
+  year            Int
+  price           Int // stored in whole Kwacha (ZMW)
+  mileage         Int // kilometres
+  fuelType        String // Petrol | Diesel | Hybrid | Electric
+  transmission    String // Manual | Automatic
+  bodyType        String // Hatchback | Sedan | SUV | Pickup | Coupe | MPV
+  color           String?
+  engineSize      String? // e.g. "2.0L" or "2.0L BiTurbo"
+  power           Int? // kW
+  doors           Int?
+  seats           Int?
+  driveType       String? // FWD | RWD | AWD | 4x4
+  serviceHistory  String? // Full | Partial | None
+  previousOwners  Int?
+  fuelConsumption Float? // l/100km
+  features        String   @default("[]") // JSON-encoded array of feature strings
+  province        String
+  city            String?
+  description     String?
+  condition       String   @default("Used") // New | Used
+  sellerType      String   @default("Private") // Private | Dealer
+  sellerName      String
+  sellerPhone     String?
+  sellerEmail     String?
+  rating          Float? // seller rating out of 5, null = "No Rating"
+  reviewCount     Int?
+  images          String   @default("[]") // JSON-encoded array of image URLs
+  featured        Boolean  @default(false)
+  status          String   @default("active") // active | sold | expired
+  views           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  leads           Lead[]
+  reviews         Review[]
+
+  // Nullable: seed/demo listings predate accounts. New listings created via
+  // the sell form always have this set (selling now requires a seller account).
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([make, model])
+  @@index([price])
+  @@index([province])
+}
+
+// A buyer enquiry against a listing ("Contact seller"). Stays anonymous —
+// no account required to browse or contact a seller.
+model Lead {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
+// A signed-in customer's rating + optional comment on a specific listing.
+// Requires an account (unlike Lead, which stays anonymous).
+model Review {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([listingId, userId])
+}
+
+// --- Auth.js (NextAuth v5) models, per the Prisma adapter's required schema ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  listings      Listing[]
+  reviews       Review[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
