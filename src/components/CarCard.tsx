@@ -3,7 +3,7 @@ import CarImage from "./CarImage";
 import FavoriteButton from "./FavoriteButton";
 import RatingBadge from "./RatingBadge";
 import SpecPills from "./SpecPills";
-import { formatZmw } from "@/lib/constants";
+import { formatZmw, parseImages } from "@/lib/constants";
 
 type Card = {
   id: string;
@@ -23,16 +23,28 @@ type Card = {
   sellerName: string;
   rating: number | null;
   reviewCount: number | null;
+  images: string;
 };
 
 export default function CarCard({ car }: { car: Card }) {
+  const thumbnail = parseImages(car.images)[0];
+
   return (
     <Link
       href={`/cars/${car.id}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="relative">
-        <CarImage make={car.make} model={car.model} className="h-44 w-full" />
+        {thumbnail ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumbnail}
+            alt={`${car.year} ${car.make} ${car.model}`}
+            className="h-44 w-full object-cover"
+          />
+        ) : (
+          <CarImage make={car.make} model={car.model} className="h-44 w-full" />
+        )}
         {car.featured && (
           <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
             Promoted

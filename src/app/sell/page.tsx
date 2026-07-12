@@ -1,5 +1,6 @@
 import { createListing, signInAction } from "@/app/actions";
 import { auth } from "@/lib/auth";
+import ImageUpload from "@/components/ImageUpload";
 import {
   MAKE_NAMES,
   PROVINCES,
@@ -60,6 +61,14 @@ export default async function SellPage() {
         action={createListing}
         className="mt-6 space-y-8 rounded-xl border border-slate-200 bg-white p-6"
       >
+        {/* Photos */}
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Photos
+          </legend>
+          <ImageUpload name="images" />
+        </fieldset>
+
         {/* Car details */}
         <fieldset className="space-y-4">
           <legend className="text-sm font-semibold uppercase tracking-wide text-slate-400">

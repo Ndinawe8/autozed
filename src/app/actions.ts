@@ -41,6 +41,16 @@ export async function createListing(formData: FormData) {
   const mileage = parseInt(get("mileage").replace(/\D/g, ""), 10);
   const features = formData.getAll("features").map((f) => f.toString());
 
+  let images: string[] = [];
+  try {
+    const parsed = JSON.parse(get("images") || "[]");
+    if (Array.isArray(parsed)) {
+      images = parsed.filter((s): s is string => typeof s === "string");
+    }
+  } catch {
+    // ignore malformed images payload, treat as no photos
+  }
+
   if (!make || !model || !year || !price || !mileage || !get("sellerName")) {
     throw new Error("Please fill in all required fields.");
   }
@@ -75,7 +85,7 @@ export async function createListing(formData: FormData) {
       sellerPhone: get("sellerPhone") || null,
       sellerEmail: session.user.email ?? null,
       userId: session.user.id,
-      images: "[]",
+      images: JSON.stringify(images),
     },
   });
 

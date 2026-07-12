@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import CarImage from "@/components/CarImage";
+import CarGallery from "@/components/CarGallery";
 import FavoriteButton from "@/components/FavoriteButton";
 import RatingBadge from "@/components/RatingBadge";
 import SpecPills from "@/components/SpecPills";
@@ -10,7 +10,13 @@ import ReviewForm from "@/components/ReviewForm";
 import StickyContactBar from "@/components/StickyContactBar";
 import { createLead, signInAction } from "@/app/actions";
 import { auth } from "@/lib/auth";
-import { formatZmw, formatKm, buildWhatsAppLink, parseFeatures } from "@/lib/constants";
+import {
+  formatZmw,
+  formatKm,
+  buildWhatsAppLink,
+  parseFeatures,
+  parseImages,
+} from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +75,7 @@ export default async function CarDetail({ params, searchParams }: Props) {
   ];
 
   const features = parseFeatures(car.features);
+  const images = parseImages(car.images);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-24 lg:pb-6">
@@ -93,21 +100,24 @@ export default async function CarDetail({ params, searchParams }: Props) {
       <div className="mt-4 grid gap-6 lg:grid-cols-3">
         {/* Left: gallery + details */}
         <div className="lg:col-span-2">
-          <div className="relative">
-            <CarImage
-              make={car.make}
-              model={car.model}
-              className="h-72 w-full rounded-xl md:h-96"
-            />
-            {car.featured && (
-              <span className="absolute left-4 top-4 rounded-full bg-blue-600 px-2.5 py-1 text-xs font-bold text-white">
-                Promoted
-              </span>
-            )}
-            <div className="absolute right-4 top-4">
-              <FavoriteButton listingId={car.id} />
-            </div>
-          </div>
+          <CarGallery
+            images={images}
+            make={car.make}
+            model={car.model}
+            className="h-72 w-full rounded-xl md:h-96"
+            overlay={
+              <>
+                {car.featured && (
+                  <span className="absolute left-4 top-4 rounded-full bg-blue-600 px-2.5 py-1 text-xs font-bold text-white">
+                    Promoted
+                  </span>
+                )}
+                <div className="absolute right-4 top-4">
+                  <FavoriteButton listingId={car.id} />
+                </div>
+              </>
+            }
+          />
 
           <h1 className="mt-5 text-2xl font-bold text-slate-900">
             {car.year} {car.make} {car.model}
